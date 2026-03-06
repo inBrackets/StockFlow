@@ -1,0 +1,14 @@
+{
+  "/users": {
+    "target": "http://localhost:8080",
+    "secure": false
+  },
+  "/portfolio": {
+    "target": "http://localhost:8080",
+    "secure": false
+  },
+  "/market": {
+    "target": "http://localhost:8080",
+    "secure": false
+  }
+}
