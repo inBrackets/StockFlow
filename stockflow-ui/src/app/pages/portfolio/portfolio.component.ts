@@ -20,17 +20,17 @@ import * as Highcharts from 'highcharts';
         <h2 class="text-xl font-bold mb-4">{{ tradeType }} Stock</h2>
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Stock Symbol</label>
-          <select [(ngModel)]="tradeSymbol" class="w-full px-3 py-2 border rounded-lg outline-none">
+          <select [(ngModel)]="tradeSymbol" data-testid="trade-symbol" class="w-full px-3 py-2 border rounded-lg outline-none">
             <option *ngFor="let s of stocks" [value]="s.symbol">{{ s.symbol }} - {{ '$' + s.currentPrice.toFixed(2) }}</option>
           </select>
         </div>
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
-          <input [(ngModel)]="tradeQuantity" type="number" min="1"
+          <input [(ngModel)]="tradeQuantity" type="number" min="1" data-testid="trade-quantity"
                  class="w-full px-3 py-2 border rounded-lg outline-none" />
         </div>
         <div class="flex space-x-3">
-          <button (click)="executeTrade()" [disabled]="tradeLoading"
+          <button (click)="executeTrade()" [disabled]="tradeLoading" data-testid="btn-confirm-trade"
                   class="flex-1 bg-accent text-white py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50">
             {{ tradeLoading ? 'Processing...' : 'Confirm' }}
           </button>
@@ -45,10 +45,10 @@ import * as Highcharts from 'highcharts';
 
     <!-- Action Buttons -->
     <div class="flex space-x-3 mb-6">
-      <button (click)="openTrade('BUY')" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium">
+      <button (click)="openTrade('BUY')" data-testid="btn-buy" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium">
         Buy Stock
       </button>
-      <button (click)="openTrade('SELL')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium">
+      <button (click)="openTrade('SELL')" data-testid="btn-sell" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium">
         Sell Stock
       </button>
     </div>
@@ -68,9 +68,9 @@ import * as Highcharts from 'highcharts';
     </div>
 
     <!-- Trade History -->
-    <div *ngIf="portfolio?.trades?.length" class="bg-white rounded-xl shadow p-6">
+    <div *ngIf="portfolio?.trades?.length" class="bg-white rounded-xl shadow p-6" data-testid="trade-history">
       <h3 class="text-lg font-bold text-primary mb-4">Trade History</h3>
-      <table class="w-full">
+      <table class="w-full" data-testid="trade-history-table">
         <thead>
           <tr class="border-b-2 border-gray-200">
             <th class="text-left py-2 px-3">Symbol</th>

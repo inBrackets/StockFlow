@@ -30,23 +30,23 @@ import { AuthService } from '../../services/auth.service';
         <form (ngSubmit)="onSubmit()">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            <input [(ngModel)]="username" name="username" required
+            <input [(ngModel)]="username" name="username" required data-testid="input-username"
                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none" />
           </div>
 
           <div *ngIf="!isLogin" class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input [(ngModel)]="email" name="email" type="email" required
+            <input [(ngModel)]="email" name="email" type="email" required data-testid="input-email"
                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none" />
           </div>
 
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input [(ngModel)]="password" name="password" type="password" required
+            <input [(ngModel)]="password" name="password" type="password" required data-testid="input-password"
                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent outline-none" />
           </div>
 
-          <button type="submit" [disabled]="loading"
+          <button type="submit" [disabled]="loading" data-testid="btn-submit"
                   class="w-full bg-accent text-white py-2 rounded-lg hover:bg-blue-600 transition font-medium disabled:opacity-50">
             {{ loading ? 'Please wait...' : (isLogin ? 'Login' : 'Register') }}
           </button>

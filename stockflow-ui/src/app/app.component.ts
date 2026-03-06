@@ -19,11 +19,11 @@ import { AuthService } from './services/auth.service';
               <a routerLink="/dashboard" routerLinkActive="bg-accent rounded px-3 py-1"
                  class="px-3 py-1 rounded hover:bg-accent transition">Dashboard</a>
               <a routerLink="/portfolio" routerLinkActive="bg-accent rounded px-3 py-1"
-                 class="px-3 py-1 rounded hover:bg-accent transition">Portfolio</a>
+                 class="px-3 py-1 rounded hover:bg-accent transition" data-testid="nav-portfolio">Portfolio</a>
               <a routerLink="/market" routerLinkActive="bg-accent rounded px-3 py-1"
                  class="px-3 py-1 rounded hover:bg-accent transition">Market</a>
               <a routerLink="/profile" routerLinkActive="bg-accent rounded px-3 py-1"
-                 class="px-3 py-1 rounded hover:bg-accent transition">Profile</a>
+                 class="px-3 py-1 rounded hover:bg-accent transition" data-testid="nav-profile">Profile</a>
               <button (click)="logout()" class="ml-4 px-3 py-1 bg-red-500 rounded hover:bg-red-600 transition">
                 Logout
               </button>
