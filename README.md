@@ -12,6 +12,11 @@ graph TD
     GW --> PS["portfolio-service :8082"]:::service
     GW --> MS["market-service :8083"]:::service
 
+    subgraph " "
+        direction LR
+        US ~~~ PS ~~~ MS
+    end
+
     US -- "user.registered" --> K["Kafka :9092"]:::infra
     PS -- "portfolio.trade.executed" --> K
     MS -- "market.price.updated" --> K
