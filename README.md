@@ -95,20 +95,82 @@ docker-compose down -v
 
 ## Local Development
 
-### Backend (any single service)
+The recommended workflow is to run infrastructure and stable services in Docker, while running the service you're actively developing from IntelliJ (or your IDE) for debugger access and hot reload.
 
-Start infrastructure first:
+### Recommended dev setup
+
+| Component | Run in | Why |
+|-----------|--------|-----|
+| MySQL, Zookeeper, Kafka, Kafka UI | Docker | Infrastructure, no code changes |
+| Services you're **not** editing | Docker | Stable, no need to rebuild |
+| Service you're actively editing | IntelliJ / IDE | Hot reload, debugger, breakpoints |
+| Angular UI | `npm start` | Live reload, proxy flexibility |
+
+### Example: developing market-service locally
+
+**1. Start everything except market-service:**
 ```bash
-docker-compose up mysql zookeeper kafka
+docker-compose up -d mysql zookeeper kafka kafka-ui user-service portfolio-service api-gateway stockflow-ui
 ```
 
-Then run a service with Gradle:
+**2. Run market-service from IntelliJ:**
+
+Open `MarketServiceApplication.java` and click Run/Debug.
+
+Since Docker MySQL is mapped to port `3307` on the host, override the datasource URL in IntelliJ's run configuration:
+
+`Run → Edit Configurations → Environment variables:`
+```
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3307/market_db
+```
+
+Alternatively, create `src/main/resources/application-local.yml`:
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3307/market_db
+```
+Then add `--spring.profiles.active=local` to the program arguments.
+
+**3. Accessing the local service:**
+
+The API Gateway routes to Docker hostnames (e.g. `http://market-service:8083`), so it won't reach your locally running service. Two options:
+
+- **Direct access:** Hit `http://localhost:8083` directly for API calls
+- **Angular dev server (recommended):** Run the UI with `npm start` and update `proxy.conf.json` to point the market route to `http://localhost:8083`
+
+### Example: developing the Angular UI locally
+
+**1. Start the backend stack:**
+```bash
+docker-compose up -d mysql zookeeper kafka kafka-ui user-service portfolio-service market-service api-gateway
+```
+
+**2. Run Angular dev server:**
+```bash
+cd stockflow-ui
+npm install
+npm start
+```
+
+Serves at http://localhost:4200 with live reload. The `proxy.conf.json` forwards API calls (`/users/**`, `/portfolio/**`, `/market/**`) to the API Gateway at `localhost:8085`, so no CORS issues.
+
+Changes to templates, styles, and TypeScript files are reflected instantly in the browser without restarting.
+
+### Running all backend services locally
+
+Start infrastructure only:
+```bash
+docker-compose up -d mysql zookeeper kafka kafka-ui
+```
+
+Then run each service with Gradle:
 ```bash
 cd user-service
-../gradlew bootRun
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3307/users_db ../gradlew bootRun
 ```
 
-Each service's `application.yml` defaults to `localhost` for MySQL and Kafka connections.
+Each service's `application.yml` defaults to `localhost` for Kafka connections. Only the MySQL port needs overriding (`3307` instead of `3306`).
 
 ### Frontend
 
@@ -119,6 +181,27 @@ npm start
 ```
 
 Serves at http://localhost:4200 with a proxy forwarding `/users/**`, `/portfolio/**`, `/market/**` to the API Gateway at `localhost:8080`.
+
+### Kafka UI
+
+Available at http://localhost:9090 when running via Docker. Browse topics, messages, and consumer groups.
+
+### Debugging Kafka from CLI
+
+```bash
+# List topics
+docker-compose exec kafka kafka-topics --list --bootstrap-server localhost:9092
+
+# Read all messages from a topic
+docker-compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic user.registered --from-beginning
+
+# Watch messages live
+docker-compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic market.price.updated
+
+# Check consumer group lag
+docker-compose exec kafka kafka-consumer-groups --bootstrap-server localhost:9092 --list
+docker-compose exec kafka kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group <group-id>
+```
 
 ## Usage Flow
 
