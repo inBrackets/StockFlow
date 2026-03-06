@@ -4,18 +4,32 @@ A microservice-based stock portfolio manager built with Java 17, Spring Boot, An
 
 ## Architecture
 
-```
-Angular UI (4200)
-       |
-API Gateway (8080) - Spring Cloud Gateway
-    /     |     \
-user-svc  portfolio-svc  market-svc
- (8081)     (8082)         (8083)
-    \        |          /
-         Kafka (9092)
-    \        |          /
-         MySQL (3306)
-   users_db  portfolio_db  market_db
+```mermaid
+graph TD
+    UI["Angular UI :4200"]:::frontend --> GW["API Gateway :8080<br/>Spring Cloud Gateway"]:::gateway
+
+    GW --> US["user-service :8081"]:::service
+    GW --> PS["portfolio-service :8082"]:::service
+    GW --> MS["market-service :8083"]:::service
+
+    US -- "user.registered" --> K["Kafka :9092"]:::infra
+    PS -- "portfolio.trade.executed" --> K
+    MS -- "market.price.updated" --> K
+    K --> PS
+    K --> MS
+
+    US --> UD[("users_db")]:::db
+    PS --> PD[("portfolio_db")]:::db
+    MS --> MD[("market_db")]:::db
+    UD -.- MY["MySQL :3306"]:::infra
+    PD -.- MY
+    MD -.- MY
+
+    classDef frontend fill:#4F46E5,color:#fff,stroke:none
+    classDef gateway fill:#0EA5E9,color:#fff,stroke:none
+    classDef service fill:#10B981,color:#fff,stroke:none
+    classDef infra fill:#F59E0B,color:#fff,stroke:none
+    classDef db fill:#6366F1,color:#fff,stroke:none
 ```
 
 ## Services
