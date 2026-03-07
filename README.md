@@ -48,6 +48,7 @@ graph TD
 | **stockflow-ui** | 4200 | Angular 17 SPA with Highcharts Dashboards |
 | **MySQL** | 3306 | Databases: users_db, portfolio_db, market_db |
 | **Kafka** | 9092 | Async messaging between services |
+| **ReportPortal** | 8086 | E2E test reporting dashboard (login: `superadmin` / `admin`) |
 
 ## Environment Requirements
 
@@ -181,6 +182,24 @@ npm start
 ```
 
 Serves at http://localhost:4200 with a proxy forwarding `/users/**`, `/portfolio/**`, `/market/**` to the API Gateway at `localhost:8080`.
+
+### ReportPortal (E2E Test Reporting)
+
+Available at http://localhost:8086/ui when running via Docker. Records test results from the `e2e-tests` module.
+
+| | |
+|---|---|
+| **URL** | http://localhost:8086/ui |
+| **Login** | `superadmin` |
+| **Password** | `admin` |
+| **Project** | `e2e_tests` |
+
+To run e2e tests and report results to ReportPortal:
+```bash
+./gradlew :e2e-tests:test
+```
+
+The test runner automatically obtains an API token from ReportPortal before execution. Results appear under the `e2e_tests` project as the "E2E Tests" launch.
 
 ### Kafka UI
 
