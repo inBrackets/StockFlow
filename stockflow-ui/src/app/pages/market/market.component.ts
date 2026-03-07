@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ApiService, StockResponse, PriceHistoryResponse } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { HighchartsChartModule } from 'highcharts-angular';
@@ -43,7 +44,7 @@ import * as Highcharts from 'highcharts';
     </div>
   `
 })
-export class MarketComponent implements OnInit {
+export class MarketComponent implements OnInit, OnDestroy {
   Highcharts: typeof Highcharts = Highcharts;
   stocks: StockResponse[] = [];
   selectedSymbol = '';
@@ -51,6 +52,7 @@ export class MarketComponent implements OnInit {
 
   priceChartOptions: Highcharts.Options = {};
   priceChartReady = false;
+  private priceSub?: Subscription;
 
   constructor(private api: ApiService, private auth: AuthService, private router: Router) {}
 
@@ -66,6 +68,16 @@ export class MarketComponent implements OnInit {
         this.loadHistory();
       }
     });
+    this.priceSub = this.api.streamPrices().subscribe(tick => {
+      const stock = this.stocks.find(s => s.symbol === tick.symbol);
+      if (stock) {
+        stock.currentPrice = tick.price;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.priceSub?.unsubscribe();
   }
 
   onSymbolChange() {

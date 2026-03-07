@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -38,6 +38,11 @@ export interface PriceHistoryResponse {
   recordedAt: string;
 }
 
+export interface PriceTick {
+  symbol: string;
+  price: number;
+}
+
 export interface TradeRequest {
   userId: number;
   stockSymbol: string;
@@ -65,7 +70,7 @@ export interface PortfolioResponse {
 export class ApiService {
   private baseUrl = '/';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private zone: NgZone) {}
 
   register(req: RegisterRequest): Observable<UserResponse> {
     return this.http.post<UserResponse>(`${this.baseUrl}users/register`, req);
@@ -101,5 +106,21 @@ export class ApiService {
 
   getPriceHistory(symbol: string): Observable<PriceHistoryResponse[]> {
     return this.http.get<PriceHistoryResponse[]>(`${this.baseUrl}market/stocks/${symbol}/history`);
+  }
+
+  streamPrices(): Observable<PriceTick> {
+    return new Observable<PriceTick>(observer => {
+      const eventSource = new EventSource(`${this.baseUrl}market/stocks/stream`);
+      eventSource.addEventListener('price-tick', (event: MessageEvent) => {
+        this.zone.run(() => {
+          observer.next(JSON.parse(event.data));
+        });
+      });
+      eventSource.onerror = () => {
+        eventSource.close();
+        observer.complete();
+      };
+      return () => eventSource.close();
+    });
   }
 }

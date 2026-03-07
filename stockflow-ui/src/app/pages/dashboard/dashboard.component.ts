@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ApiService, StockResponse, PortfolioResponse } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { HighchartsChartModule } from 'highcharts-angular';
@@ -53,7 +54,7 @@ import * as Highcharts from 'highcharts';
     </div>
   `
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   Highcharts: typeof Highcharts = Highcharts;
   stocks: StockResponse[] = [];
   portfolio: PortfolioResponse | null = null;
@@ -62,6 +63,7 @@ export class DashboardComponent implements OnInit {
   pieChartOptions: Highcharts.Options = {};
   stockChartReady = false;
   pieChartReady = false;
+  private priceSub?: Subscription;
 
   constructor(private api: ApiService, private auth: AuthService, private router: Router) {}
 
@@ -71,6 +73,16 @@ export class DashboardComponent implements OnInit {
       return;
     }
     this.loadData();
+    this.priceSub = this.api.streamPrices().subscribe(tick => {
+      const stock = this.stocks.find(s => s.symbol === tick.symbol);
+      if (stock) {
+        stock.currentPrice = tick.price;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.priceSub?.unsubscribe();
   }
 
   private loadData() {
